@@ -40,3 +40,59 @@ while (true) {
 }
 reader.releaseLock();
 ```
+
+---
+
+```js
+// main.js
+import { ReadableSyncStream } from "@jcbhmr/streams-sync";
+
+const stream = new ReadableStreamSync({
+  async pull(c) {
+    const response = await fetch("https://example.org/");
+    const text = await response.text();
+    c.enqueue(text);
+  }
+});
+
+const worker = new Worker("worker.js");
+worker.postMessage({ type: "now", sharedBuffer: stream.sharedBuffer });
+```
+
+```js
+// worker.js
+import { ReadableSyncStream } from "@jcbhmr/streams-sync";
+
+const sharedBuffer = new Promise((resolve) => {
+  globalThis.addEventListener("message", function f(event) {
+    if (event.data?.type === "now") {
+      resolve(event.data.sharedBuffer);
+      globalThis.removeEventListener("message", f);
+    }
+  });
+});
+
+const stream = ReadableSyncStream.from(sharedBuffer);
+const reader = stream.getReader();
+const text = reader.read();
+reader.releaseLock();
+console.log(text);
+```
+
+---
+
+```js
+// main.js
+import { BidirectionalSyncStream } from "@jcbhmr/streams-sync";
+
+const stream = new ReadableStreamSync({
+  async pull(c) {
+    const response = await fetch("https://example.org/");
+    const text = await response.text();
+    c.enqueue(text);
+  }
+});
+
+const worker = new Worker("worker.js");
+worker.postMessage({ type: "now", sharedBuffer: stream.sharedBuffer });
+```
