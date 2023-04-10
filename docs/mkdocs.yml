@@ -1,0 +1,23 @@
+site_name: Synchronous streams
+site_description:
+  🌊 Synchronous version of ReadableStream, WritableStream, TransformStream, and
+  BidirectionalStream
+site_author: Jacob Hummer
+repo_url: https://github.com/jcbhmr/streams-sync
+edit_uri: blob/main/docs/src/
+copyright: Copyright © 2023 Jacob Hummer
+docs_dir: src
+site_dir: dist
+theme:
+  name: readthedocs
+markdown_extensions:
+  smarty: {}
+  sane_lists: {}
+  md_in_html: {}
+nav:
+  - Introduction: index.md
+  - Tasks: tasks.md
+  - Models: models.md
+  - API: https://jcbhmr.github.io/streams-sync/api/
+  - Playground: https://streams-sync-playground.netlify.app/
+  - Dev wiki: https://github.com/jcbhmr/streams-sync/wiki
