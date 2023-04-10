@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "prepack": "vite build",
+    "postpack": ""
+  }
+}
