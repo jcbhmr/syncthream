@@ -1,50 +1,61 @@
-# sync-streams
+# Synchronous streams
+
+🌊 Synchronous version of `ReadableStream`, `WritableStream`, `TransformStream`, and
+`BidirectionalStream`
+
+<div align="center">
+
+![]()
+
+</div>
+
+⏱ Completely synchronous `.read()` \
+⚛️ Perfect for WebAssembly operations \
+💽 Serializes objects across thread boundaries
+
+## Installation
+
+![npm](https://img.shields.io/static/v1?style=for-the-badge&message=npm&color=CB3837&logo=npm&logoColor=FFFFFF&label=)
+![jsDelivr](https://img.shields.io/static/v1?style=for-the-badge&message=jsDelivr&color=E84D3D&logo=jsDelivr&logoColor=FFFFFF&label=)
+
+## Usage
+
+![Google Chrome](https://img.shields.io/static/v1?style=for-the-badge&message=Google+Chrome&color=4285F4&logo=Google+Chrome&logoColor=FFFFFF&label=)
+![Node.js](https://img.shields.io/static/v1?style=for-the-badge&message=Node.js&color=339933&logo=Node.js&logoColor=FFFFFF&label=)
+
+This package can be used in the browser or in a Node.js environment. It doesn't come reliant on a `Worker` implementation, so you're free to use Node.js' native `node:worker_threads` instead. Just make sure that you have cross origin isolation turned on in your browser! You'll need to set the `Cross-Origin-Embedder-Policy: require-corp` and the `Cross-Origin-Opener-Policy: same-origin` headers to make `SharedArrayBuffer` available. This is needed so that two separate threads can share memory and use `Atomics.wait()` to 
 
 ```js
-// main.js
 import { ReadableSyncStream } from "@jcbhmr/streams-sync";
 
 let controller;
-const stream = new ReadableStreamSync({ start: (c) => controller = c });
+const stream = new ReadableStreamSync({ start: (c) => (controller = c) });
 controller.enqueue("Hello world!");
+setTimeout(() => controller.enqueue("Goodbye!"), 1000);
 
 const worker = new Worker("worker.js");
-worker.postMessage({ type: "readme", sharedBuffer: stream.sharedBuffer });
-
-setTimeout(() => controller.enqueue("Goodbye!"), 1000);
+worker.postMessage(stream.buffer);
 ```
 
 ```js
-// worker.js
 import { ReadableSyncStream } from "@jcbhmr/streams-sync";
 
-const sharedBuffer = new Promise((resolve) => {
-  globalThis.addEventListener("message", function f(event) {
-    if (event.data?.type === "readme") {
-      resolve(event.data.sharedBuffer);
-      globalThis.removeEventListener("message", f);
-    }
-  });
+const buffer = await new Promise((resolve) => {
+  globalThis.addEventListener("message", e => resolve(event.data.buffer), { once: true });
 });
 
-setTimeout(() => console.log("10ms passed!"), 10)
-
-const stream = ReadableSyncStream.from(sharedBuffer);
+const stream = ReadableSyncStream.from(buffer);
 const reader = stream.getReader();
-while (true) {
-  const { value, done } = reader.read();
-  if (done) {
-    break;
-  }
+
+setTimeout(() => console.log("10ms passed!"), 10)
+for (let { value, done } = reader.read(); !done; ({ value, done } = reader.read())) {
   console.log(value);
 }
+
 reader.releaseLock();
 ```
 
----
-
 ```js
-// main.js
 import { ReadableSyncStream } from "@jcbhmr/streams-sync";
 
 const stream = new ReadableStreamSync({
