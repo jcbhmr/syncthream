@@ -44,11 +44,11 @@ You can install this package locally using npm, or import it directly from an
 npm CDN like [ESM>CDN] or [jsDelivr].
 
 ```sh
-npm install @jcbhmr/sab-streams
+npm install @jcbhmr/buffer-streams
 ```
 
 ```js
-import {} from "https://esm.sh/@jcbhmr/sab-streams";
+import {} from "https://esm.sh/@jcbhmr/buffer-streams";
 ```
 
 If you're in the browser, you'll need to make sure your site (or even just the
