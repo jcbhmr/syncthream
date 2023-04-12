@@ -6,8 +6,6 @@
 
 ```js
 // main.js
-import { WritableBufferStream } from "@jcbhmr/buffer-streams";
-
 const response = await fetch("https://example.org/");
 
 const writable = new WritableBufferStream(100);
@@ -22,14 +20,13 @@ worker.postMessage(writable.buffer);
 ```js
 // worker.js
 const syncStream = new ReadableBufferSyncStream(buffer);
+
 const decoder = new TextDecoder();
 let string = "";
 for (const chunk of syncStream) {
   string += decoder.decode(chunk, { stream: true });
 }
 string += decoder.decode();
-
-console.log(string);
 ```
 
 </table>
