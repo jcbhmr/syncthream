@@ -1,109 +1,88 @@
-# Synchronous streams
+# Shared buffer streams
 
-🌊 Synchronous version of `ReadableStream`, `WritableStream`, `TransformStream`, and
-`BidirectionalStream`
+🌊 Low-level idiomatic utilities for sync/async cross-thread streaming
 
-<div align="center">
+<table align="center"><td>
 
-![]()
+```js
+// main.js
+import { WritableBufferStream } from "@jcbhmr/buffer-streams";
 
-</div>
+const response = await fetch("https://example.org/")
 
+const writable = new WritableBufferStream(100)
+const pipePromise = response.body.pipeTo(writable)
+
+const worker = new Worker("worker.js")
+worker.postMessage(writable.buffer)
+
+await pipePromise
+```
+
+<td>
+
+```js
+// worker.js
+import { ReadableSyncBufferHandle } from "@jcbhmr/buffer-streams"
+import { pEvent } from "p-event"
+
+const { data: buffer } = await pEvent(globalThis, "message")
+const handle = new ReadableSyncBufferHandle(buffer)
+
+const buffer = new ArrayBuffer(16)
+let readByteLength = 0;
+const decoder = new TextDecoder()
+let string = ""
+while ((readByteLength = handle.read(buffer))) {
+  const chunk = new Uint8Array(buffer, 0, readByteLength)
+  string += decoder.decode(chunk, { stream: true })
+}
+string += decoder.decode();
+```
+
+</table>
+
+⚠️ Requires `SharedArrayBuffer` \
 ⏱ Completely synchronous `.read()` \
 ⚛️ Perfect for WebAssembly operations \
-💽 Serializes objects across thread boundaries
+💽 Works fantastically with all `TypedArray`s
 
 ## Installation
 
 ![npm](https://img.shields.io/static/v1?style=for-the-badge&message=npm&color=CB3837&logo=npm&logoColor=FFFFFF&label=)
 ![jsDelivr](https://img.shields.io/static/v1?style=for-the-badge&message=jsDelivr&color=E84D3D&logo=jsDelivr&logoColor=FFFFFF&label=)
 
+You can install this package locally using npm, or import it directly from an npm CDN like [ESM>CDN] or [jsDelivr].
+
+```sh
+npm install @jcbhmr/sab-streams
+```
+
+```js
+import {} from "https://esm.sh/@jcbhmr/sab-streams";
+```
+
+If you're in the browser, you'll need to make sure your site (or even just the page that you want to use it on) is [cross-origin isolated]. You can do this by setting the `Cross-Origin-Opener-Policy-Report-Only: same-origin` and `Cross-Origin-Embedder-Policy-Report-Only: require-corp` headers. If you're stuck on a hosting platform and you can't edit server-side headers (like GitHub Pages), you can [use a service worker to add headers].
+
 ## Usage
 
 ![Google Chrome](https://img.shields.io/static/v1?style=for-the-badge&message=Google+Chrome&color=4285F4&logo=Google+Chrome&logoColor=FFFFFF&label=)
 ![Node.js](https://img.shields.io/static/v1?style=for-the-badge&message=Node.js&color=339933&logo=Node.js&logoColor=FFFFFF&label=)
 
-This package can be used in the browser or in a Node.js environment. It doesn't come reliant on a `Worker` implementation, so you're free to use Node.js' native `node:worker_threads` instead. Just make sure that you have cross origin isolation turned on in your browser! You'll need to set the `Cross-Origin-Embedder-Policy: require-corp` and the `Cross-Origin-Opener-Policy: same-origin` headers to make `SharedArrayBuffer` available. This is needed so that two separate threads can share memory and use `Atomics.wait()` to 
 
-```js
-import { ReadableSyncStream } from "@jcbhmr/streams-sync";
-
-let controller;
-const stream = new ReadableStreamSync({ start: (c) => (controller = c) });
-controller.enqueue("Hello world!");
-setTimeout(() => controller.enqueue("Goodbye!"), 1000);
-
-const worker = new Worker("worker.js");
-worker.postMessage(stream.buffer);
-```
-
-```js
-import { ReadableSyncStream } from "@jcbhmr/streams-sync";
-
-const buffer = await new Promise((resolve) => {
-  globalThis.addEventListener("message", e => resolve(event.data.buffer), { once: true });
-});
-
-const stream = ReadableSyncStream.from(buffer);
-const reader = stream.getReader();
-
-setTimeout(() => console.log("10ms passed!"), 10)
-for (let { value, done } = reader.read(); !done; ({ value, done } = reader.read())) {
-  console.log(value);
-}
-
-reader.releaseLock();
-```
-
-```js
-import { ReadableSyncStream } from "@jcbhmr/streams-sync";
-
-const stream = new ReadableStreamSync({
-  async pull(c) {
-    const response = await fetch("https://example.org/");
-    const text = await response.text();
-    c.enqueue(text);
-  }
-});
-
-const worker = new Worker("worker.js");
-worker.postMessage({ type: "now", sharedBuffer: stream.sharedBuffer });
-```
 
 ```js
 // worker.js
-import { ReadableSyncStream } from "@jcbhmr/streams-sync";
+import { ReadableBufferSyncStream } from "@jcbhmr/streams-sync";
 
-const sharedBuffer = new Promise((resolve) => {
-  globalThis.addEventListener("message", function f(event) {
-    if (event.data?.type === "now") {
-      resolve(event.data.sharedBuffer);
-      globalThis.removeEventListener("message", f);
-    }
-  });
-});
-
-const stream = ReadableSyncStream.from(sharedBuffer);
-const reader = stream.getReader();
-const text = reader.read();
-reader.releaseLock();
-console.log(text);
+const syncStream = new ReadableBufferSyncStream(buffer)
+const decoder = new TextDecoder()
+let string = ""
+for (const chunk of syncStream) {
+  string += decoder.decode(chunk, { stream: true })
+}
+string += decoder.decode()
 ```
 
----
-
-```js
-// main.js
-import { BidirectionalSyncStream } from "@jcbhmr/streams-sync";
-
-const stream = new ReadableStreamSync({
-  async pull(c) {
-    const response = await fetch("https://example.org/");
-    const text = await response.text();
-    c.enqueue(text);
-  }
-});
-
-const worker = new Worker("worker.js");
-worker.postMessage({ type: "now", sharedBuffer: stream.sharedBuffer });
-```
+[cross-origin isolated]: https://web.dev/cross-origin-isolation-guide/
+[use a service worker to add headers]: https://dev.to/stefnotch/enabling-coop-coep-without-touching-the-server-2d3n
