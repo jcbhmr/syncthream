@@ -86,6 +86,8 @@ string += decoder.decode();
 ```
 
 <!-- prettier-ignore-start -->
+[ESM>CDN]: https://esm.sh/
+[jsdelivr]: https://www.jsdelivr.com/esm
 [cross-origin isolated]: https://web.dev/cross-origin-isolation-guide/
 [use a service worker to add headers]: https://dev.to/stefnotch/enabling-coop-coep-without-touching-the-server-2d3n
 [bson]: https://bsonspec.org/
