@@ -2,34 +2,11 @@
 
 🌊 Low-level idiomatic utilities for sync/async cross-thread streaming
 
-<table align="center"><td>
+<div align="center">
 
-```js
-// main.js
-const response = await fetch("https://example.org/");
+![](https://user-images.githubusercontent.com/61068799/231580922-37ab2215-c2dd-4604-a57c-6f8a21edeebf.png)
 
-const writable = new WritableBufferStream(100);
-response.body.pipeTo(writable);
-
-const worker = new Worker("worker.js");
-worker.postMessage(writable.buffer);
-```
-
-<td>
-
-```js
-// worker.js
-const syncStream = new ReadableBufferSyncStream(buffer);
-
-const decoder = new TextDecoder();
-let string = "";
-for (const chunk of syncStream) {
-  string += decoder.decode(chunk, { stream: true });
-}
-string += decoder.decode();
-```
-
-</table>
+</div>
 
 ⚛️ Perfect for WebAssembly operations \
 🔟 Only works with raw buffers & bytes \
