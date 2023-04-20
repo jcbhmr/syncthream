@@ -1,7 +1,6 @@
 site_name: Synchronous streams
 site_description:
-  🌊 Synchronous version of ReadableStream, WritableStream, TransformStream, and
-  BidirectionalStream
+  🌊 Low-level idiomatic utilities for sync/async cross-thread streaming
 site_author: Jacob Hummer
 repo_url: https://github.com/jcbhmr/streams-sync
 edit_uri: blob/main/docs/src/

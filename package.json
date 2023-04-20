@@ -1,0 +1,19 @@
+{
+  "name": "@jcbhmr/buffer-streams",
+  "description": "🌊 Low-level idiomatic utilities for sync/async cross-thread streaming",
+  "version": "1.0.0",
+  "license": "MIT",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
+  },
+  "scripts": {
+    "prepare": "./setup.sh",
+    "start": "vitest",
+    "pretest": "prettier -w --ignore-path .gitignore .",
+    "test": "tsc --noEmit && vitest run",
+    "prepack": "vite build",
+    "build-docs": "(cd docs && mkdocs) && typedoc",
+    "build-docs-playground": "npm pack -w docs/playground"
+  }
+}
